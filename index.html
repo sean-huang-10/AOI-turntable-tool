@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AOI 轉盤評估工具</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;background:#f0f0ed;color:#1a1a1a;min-height:100vh}
+.wrap{max-width:1060px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:17px;font-weight:700;margin-bottom:2px}
+.sub{font-size:12px;color:#888;margin-bottom:18px}
+.layout{display:flex;gap:14px;align-items:flex-start}
+.left-col{flex:1;min-width:0}
+.right-col{width:296px;flex-shrink:0}
+.sticky-card{position:sticky;top:16px}
+.card{background:#fff;border:1px solid #e0e0dc;border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.sl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#aaa;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld label{font-size:11px;color:#777;font-weight:600}
+.fld input[type=number]{border:1px solid #d8d8d4;border-radius:6px;padding:6px 9px;font-size:14px;width:100%;outline:none;color:#1a1a1a;background:#fff}
+.fld input[type=number]:focus{border-color:#3a7fd4;box-shadow:0 0 0 2px rgba(58,127,212,.12)}
+.fld input[type=range]{accent-color:#3a7fd4;width:100%;margin-top:2px}
+.hint{font-size:10px;color:#bbb;margin-top:2px;line-height:1.4}
+/* pitch vis */
+.pitch-vis{display:flex;height:30px;background:#f0f0ec;border-radius:6px;overflow:hidden;border:1px solid #e8e8e4;margin-top:6px}
+.pv-piece{background:#3a7fd4;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;transition:width .15s;min-width:2px}
+.pv-gap{background:#e4e4e0;height:100%;transition:width .15s}
+/* speed hero */
+.hero{display:flex;align-items:baseline;gap:8px;background:#e6f0fb;border-radius:8px;padding:12px 14px;margin-bottom:10px;flex-wrap:wrap}
+.hero-num{font-size:30px;font-weight:800;color:#1a4fa0;line-height:1}
+.hero-unit{font-size:13px;color:#4a7aba}
+.hero-desc{font-size:11px;color:#7a9acc;margin-left:2px}
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px}
+.mc{border-radius:7px;padding:9px 11px}
+.mc-l{font-size:10px;margin-bottom:3px}
+.mc-v{font-size:17px;font-weight:700;line-height:1.2}
+.mc-u{font-size:10px;margin-top:1px}
+.mc.b{background:#e6f0fb}.mc.b .mc-l{color:#3060b0}.mc.b .mc-v{color:#1a4fa0}.mc.b .mc-u{color:#5080c0}
+.mc.g{background:#e4f2ea}.mc.g .mc-l{color:#2a7040}.mc.g .mc-v{color:#1a5830}.mc.g .mc-u{color:#3a8050}
+.mc.a{background:#fef3de}.mc.a .mc-l{color:#906010}.mc.a .mc-v{color:#704800}.mc.a .mc-u{color:#a07020}
+.mc.r{background:#fce8e8}.mc.r .mc-l{color:#b03030}.mc.r .mc-v{color:#902020}.mc.r .mc-u{color:#c04040}
+/* diff badge */
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;vertical-align:middle;margin-left:6px}
+.bup{background:#e4f2ea;color:#1a5830}
+.bdn{background:#fce8e8;color:#902020}
+.bneutral{background:#f0f0ec;color:#666}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:10px;font-weight:700;color:#aaa;text-align:left;padding:6px 8px;border-bottom:2px solid #e8e8e4;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:6px 8px;border-bottom:1px solid #f0f0ec;color:#333;vertical-align:middle}
+tr.hl td{background:#eef5ff;font-weight:600}
+td.diam-c{color:#1a4fa0;font-weight:700}
+.bar-w{width:60px;height:6px;background:#f0f0ec;border-radius:3px;display:inline-block;vertical-align:middle;margin-left:5px;overflow:hidden}
+.bar-f{height:100%;border-radius:3px;background:#3a7fd4}
+.note{font-size:11px;color:#888;padding:8px 10px;background:#f8f8f5;border-radius:6px;margin-top:8px;line-height:1.55}
+/* canvas area */
+#viz{display:block;border-radius:8px;background:#f8f8f5;border:1px solid #e8e8e4}
+.viz-ctrl{margin-top:8px}
+.viz-ctrl label{font-size:10px;color:#999;font-weight:600;display:block;margin-bottom:2px}
+.viz-ctrl input[type=range]{accent-color:#3a7fd4;width:100%}
+.viz-info{display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:6px}
+@media(max-width:720px){.layout{flex-direction:column}.right-col{width:100%}.sticky-card{position:static}}
+@media(max-width:520px){.g3{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AOI 轉盤評估工具</h1>
+  <p class="sub">從目標產能反推需要的線速度，比較不同轉盤大小的 RPM 與 pulse/s</p>
+
+  <div class="layout">
+    <!-- ══ LEFT COLUMN ══ -->
+    <div class="left-col">
+
+      <div class="card">
+        <p class="sl">基本條件</p>
+        <div class="g3">
+          <div class="fld"><label>目標產能</label><input type="number" id="target" value="1000" min="1" step="10"><span class="hint">pcs / min</span></div>
+          <div class="fld"><label>物料尺寸（行進方向）</label><input type="number" id="psize" value="0.3" min="0.01" step="0.01"><span class="hint">mm</span></div>
+          <div class="fld"><label>每圈 Pulse 數（PPR）</label><input type="number" id="ppc" value="360000" min="1"><span class="hint">DD 馬達直接填 PPR</span></div>
+        </div>
+        <div class="g2" style="margin-top:10px">
+          <div class="fld"><label>轉盤直徑</label><input type="number" id="diam" value="600" min="50" step="10"><span class="hint">mm</span></div>
+          <div class="fld"><label>實際速度設定</label><input type="number" id="pulses" value="32000" min="0"><span class="hint">pulse / s（填 0 略過）</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="sl">震動盤 × 轉盤速度</p>
+        <p style="font-size:11px;color:#aaa;margin-bottom:10px">
+          間距由「線速度 ÷ 震動盤節拍」自動計算，轉越快間距越大
+        </p>
+        <div class="g2">
+          <div class="fld">
+            <label>最小安全間距</label>
+            <input type="number" id="min-gap" value="2" min="0" step="0.5">
+            <span class="hint">mm（低於此值顯示警告）</span>
+          </div>
+          <div style="display:flex;flex-direction:column;justify-content:center;gap:4px">
+            <div style="font-size:10px;color:#aaa">計算出的實際空隙</div>
+            <div style="font-size:22px;font-weight:700;color:#1a4fa0" id="derived-gap-val">— mm</div>
+            <div style="font-size:10px;color:#aaa" id="derived-pitch-val">Pitch —</div>
+          </div>
+        </div>
+        <div class="pitch-vis" id="pitch-vis" style="margin-top:10px"></div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:#ccc;margin-top:2px">
+          <span id="lbl-p">物料</span><span id="lbl-g">空隙</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="sl">相機停留時間 × 動態模糊</p>
+        <p style="font-size:11px;color:#aaa;margin-bottom:12px">輸入相機與鏡頭規格，自動計算 FOV、停留時間與動態模糊</p>
+
+        <div class="g2" style="margin-bottom:10px">
+          <div class="fld">
+            <label>鏡頭類型</label>
+            <select id="lens-type" style="border:1px solid #d5d5d0;border-radius:6px;padding:6px 9px;font-size:14px;width:100%;outline:none;color:#1a1a1a;background:#fff">
+              <option value="telecentric">遠心鏡（Telecentric）</option>
+              <option value="cctv">CCTV / 定焦鏡</option>
+            </select>
+            <span class="hint">遠心鏡填倍率；CCTV 填焦距與工作距離</span>
+          </div>
+          <div class="fld" id="fld-mag" style="">
+            <label>鏡頭倍率</label>
+            <input type="number" id="magnification" value="0.5" min="0.01" step="0.01">
+            <span class="hint">× （如 0.5× / 1× / 2×）</span>
+          </div>
+        </div>
+
+        <div class="g2" id="cctv-fields" style="display:none;margin-bottom:10px">
+          <div class="fld">
+            <label>鏡頭焦距</label>
+            <input type="number" id="focal" value="25" min="1" step="1">
+            <span class="hint">mm</span>
+          </div>
+          <div class="fld">
+            <label>工作距離（WD）</label>
+            <input type="number" id="wd" value="150" min="1" step="1">
+            <span class="hint">mm（鏡頭前端到物體）</span>
+          </div>
+        </div>
+
+        <div class="g3">
+          <div class="fld">
+            <label>感光元件解析度</label>
+            <input type="number" id="sensor-px" value="2048" min="1" step="1">
+            <span class="hint">px（行進方向軸）</span>
+          </div>
+          <div class="fld">
+            <label>像素大小</label>
+            <input type="number" id="pixsize" value="3.45" min="0.01" step="0.01">
+            <span class="hint">µm / px</span>
+          </div>
+          <div class="fld">
+            <label>曝光時間</label>
+            <input type="number" id="exposure" value="100" min="1" step="1">
+            <span class="hint">µs（微秒）</span>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;padding:8px 12px;background:#f0f4fb;border-radius:6px;font-size:12px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <span style="color:#888">計算出的 FOV</span>
+          <span id="fov-display" style="font-size:18px;font-weight:700;color:#1a4fa0">— mm</span>
+          <span style="color:#aaa" id="fov-detail"></span>
+        </div>
+
+        <div class="metrics" id="blur-metrics" style="margin-top:10px"></div>
+        <div id="blur-note" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <p class="sl">需要的線速度</p>
+        <div class="hero">
+          <span class="hero-num" id="mmps-val">—</span>
+          <span class="hero-unit">mm / s</span>
+          <span class="hero-desc" id="mmps-desc"></span>
+        </div>
+        <div class="metrics" id="main-metrics"></div>
+        <div id="actual-block" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <p class="sl">速度 → 間距對照（固定目標產能 <span id="target-lbl">1000</span> pcs/min）</p>
+        <p style="font-size:11px;color:#aaa;margin-bottom:10px">轉速越快，間距越大。目前設定以 <span style="color:#1a4fa0;font-weight:700">藍色</span> 標示。</p>
+        <div style="overflow-x:auto"><table><thead><tr>
+          <th>Pulse / s</th><th>線速度 (mm/s)</th><th>RPM</th><th>Pitch (mm)</th><th>空隙 (mm)</th><th>安全？</th>
+        </tr></thead><tbody id="size-tbody"></tbody></table></div>
+      </div>
+
+      <div class="card">
+        <p class="sl">直徑 → 間距對照（固定 <span id="diam-lbl">600</span>mm，目前速度）</p>
+        <p style="font-size:11px;color:#aaa;margin-bottom:10px">同樣轉速，直徑越大線速度越快，間距越大。</p>
+        <div style="overflow-x:auto"><table><thead><tr>
+          <th>直徑</th><th>線速度 (mm/s)</th><th>RPM</th><th>Pitch (mm)</th><th>空隙 (mm)</th><th>安全？</th>
+        </tr></thead><tbody id="pitch-tbody"></tbody></table></div>
+      </div>
+
+    </div><!-- end left-col -->
+
+    <!-- ══ RIGHT COLUMN ══ -->
+    <div class="right-col">
+      <div class="card sticky-card">
+        <p class="sl">動態示意圖</p>
+        <canvas id="viz" width="280" height="340"></canvas>
+
+        <div class="viz-ctrl" style="margin-top:10px">
+          <label>轉盤顯示大小</label>
+          <input type="range" id="viz-disk" min="50" max="120" value="88" step="1">
+        </div>
+        <div class="viz-ctrl" style="margin-top:6px">
+          <label>物料顯示大小</label>
+          <input type="range" id="viz-mat" min="1" max="16" value="4" step="1">
+        </div>
+        <div class="viz-info">
+          <span id="viz-rpm-lbl">實際 RPM: —</span>
+          <span id="viz-mat-lbl">載料: —</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end layout -->
+</div><!-- end wrap -->
+
+<script>
+/* ─── helpers ─── */
+function f(v,d){
+  if(!isFinite(v)||isNaN(v))return'—';
+  if(d!==undefined)return parseFloat(v.toFixed(d)).toString();
+  if(Math.abs(v)>=10000)return v.toLocaleString('zh-TW',{maximumFractionDigits:0});
+  if(Math.abs(v)>=1000)return parseFloat(v.toFixed(1)).toString();
+  if(Math.abs(v)>=10)return parseFloat(v.toFixed(2)).toString();
+  if(Math.abs(v)>=1)return parseFloat(v.toFixed(3)).toString();
+  return parseFloat(v.toPrecision(4)).toString();
+}
+function mc(l,v,u,c){return`<div class="mc ${c}"><div class="mc-l">${l}</div><div class="mc-v">${v}</div><div class="mc-u">${u}</div></div>`}
+function calcRpm(mmps,r){return mmps/(2*Math.PI*r)*60}
+function calcPulseS(rpm,ppc){return rpm/60*ppc}
+function matsOnDisk(r,pitch){return 2*Math.PI*r/pitch}
+
+/* ─── animation state ─── */
+let vizAngle = 0;
+let railTime  = 0;
+let lastTs = null;
+let pieces = [];           // disk-frame angles of pieces currently on disk
+let lastFeedVizAngle = null;
+let paramKey = '';
+const DISPLAY_SCALE = 8;   // visual speed multiplier so slow RPMs are visible
+const PICK_ALPHA  =  Math.PI/2;   // entry: 6 o'clock
+const EJECT_ALPHA = -Math.PI;     // exit:  9 o'clock (CCW from entry = 270°)
+
+/* ─── main update ─── */
+function getP(){
+  return{
+    target:  parseFloat(document.getElementById('target').value)||1,
+    psize:   parseFloat(document.getElementById('psize').value)||0.1,
+    ppc:     parseFloat(document.getElementById('ppc').value)||1,
+    diam:    parseFloat(document.getElementById('diam').value)||600,
+    pulses:  parseFloat(document.getElementById('pulses').value)||0,
+    minGap:  parseFloat(document.getElementById('min-gap').value)||0,
+    exposure: parseFloat(document.getElementById('exposure').value)||100,
+    pixsize:  parseFloat(document.getElementById('pixsize').value)||3.45,
+    sensorPx: parseFloat(document.getElementById('sensor-px').value)||2048,
+    lensType: document.getElementById('lens-type').value,
+    mag:      parseFloat(document.getElementById('magnification').value)||0.5,
+    focal:    parseFloat(document.getElementById('focal').value)||25,
+    wd:       parseFloat(document.getElementById('wd').value)||150,
+    diskViz: parseInt(document.getElementById('viz-disk').value)||88,
+    matViz:  parseInt(document.getElementById('viz-mat').value)||4,
+  };
+}
+
+function update(){
+  const p   = getP();
+  const r   = p.diam/2;
+  const tps = p.target/60; // pieces per second (vibratory bowl rate)
+
+  // Actual speed → derived pitch (震動盤邏輯)
+  const actRpm   = p.pulses>0 ? p.pulses/p.ppc*60 : null;
+  const actMmps  = actRpm ? actRpm/60*(2*Math.PI*r) : null;
+  const pitch    = actMmps ? actMmps/tps : null;       // mm per piece slot
+  const gap      = pitch   ? pitch-p.psize : null;     // actual gap between materials
+  const gapOk    = gap!==null ? gap>=p.minGap : null;
+
+  // Reference (when no actual speed): at minGap → what speed is needed?
+  const refPitch  = p.psize + p.minGap;
+  const refMmps   = refPitch * tps;
+  const refRpm    = calcRpm(refMmps, r);
+  const refPulseS = calcPulseS(refRpm, p.ppc);
+
+  // Pitch visualisation
+  const dispPitch = pitch || refPitch;
+  const dispGap   = gap   !== null ? gap : p.minGap;
+  document.getElementById('derived-gap-val').textContent  = gap!==null ? f(gap,3)+' mm' : '— mm';
+  document.getElementById('derived-gap-val').style.color  = gapOk===false?'#902020':gapOk===true?'#1a6038':'#1a4fa0';
+  document.getElementById('derived-pitch-val').textContent= 'Pitch '+(pitch?f(pitch,3):'—')+' mm';
+  document.getElementById('lbl-p').textContent = `物料 ${p.psize}mm`;
+  document.getElementById('lbl-g').textContent = `空隙 ${f(dispGap,2)}mm`;
+  const pw = Math.max(2, Math.round(p.psize/dispPitch*100));
+  document.getElementById('pitch-vis').innerHTML =
+    `<div class="pv-piece" style="width:${pw}%">${p.psize}</div>`+
+    `<div class="pv-gap" style="width:${100-pw}%"></div>`;
+
+  document.getElementById('diam-lbl').textContent   = p.diam;
+  document.getElementById('target-lbl').textContent = p.target;
+
+  // ── Camera FOV calculation ──
+  const sensorMm = p.sensorPx * p.pixsize / 1000;   // sensor width in mm
+  let fovMm, fovDetail;
+  if(p.lensType==='telecentric'){
+    fovMm   = sensorMm / p.mag;
+    fovDetail = `Sensor ${f(sensorMm,3)}mm ÷ ${p.mag}× = ${f(fovMm,3)}mm`;
+  } else {
+    // CCTV: magnification = focal / (wd - focal), FOV = sensor / mag
+    const cctvMag = p.focal / (p.wd - p.focal);
+    fovMm   = sensorMm / cctvMag;
+    fovDetail = `Sensor ${f(sensorMm,3)}mm, WD ${p.wd}mm, f ${p.focal}mm → mag ${f(cctvMag,3)}× → FOV ${f(fovMm,2)}mm`;
+  }
+  document.getElementById('fov-display').textContent = f(fovMm,3)+' mm';
+  document.getElementById('fov-detail').textContent  = fovDetail;
+
+  // Show/hide CCTV fields
+  document.getElementById('cctv-fields').style.display = p.lensType==='cctv'?'grid':'none';
+  document.getElementById('fld-mag').style.display     = p.lensType==='telecentric'?'flex':'none';
+
+  // ── Camera dwell & motion blur ──
+  const linSpd = actMmps || (reqMmps);   // mm/s at sensing radius
+  const dwellMs   = linSpd>0 ? (fovMm/linSpd)*1000 : null;
+  const dwellUs   = dwellMs ? dwellMs*1000 : null;
+  const blurMm    = linSpd>0 ? linSpd*(p.exposure/1e6) : null;
+  const blurPx    = blurMm!==null ? blurMm/(p.pixsize/1000) : null;
+  const blurPct   = dwellMs && blurMm!==null ? blurMm/fovMm*100 : null;
+  const expOk     = dwellUs!==null && p.exposure<=dwellUs;
+
+  function blurCls(px){
+    if(px===null) return '';
+    if(px<0.5) return 'g';
+    if(px<1.5) return 'a';
+    return 'r';
+  }
+  function dwellCls(){
+    if(dwellUs===null) return '';
+    return p.exposure<=dwellUs ? 'g' : 'r';
+  }
+
+  document.getElementById('blur-metrics').innerHTML =
+    mc('停留時間', dwellUs!==null?f(dwellUs,1):'—', 'µs', dwellCls()) +
+    mc('停留時間', dwellMs!==null?f(dwellMs,3):'—', 'ms', dwellCls()) +
+    mc('模糊距離', blurMm!==null?f(blurMm,4):'—', 'mm', blurCls(blurPx)) +
+    mc('模糊像素', blurPx!==null?f(blurPx,2):'—', 'px', blurCls(blurPx)) +
+    mc('模糊佔FOV', blurPct!==null?f(blurPct,2):'—', '%', blurCls(blurPx));
+
+  const blurNote = document.getElementById('blur-note');
+  if(dwellUs!==null){
+    if(!expOk){
+      blurNote.innerHTML=`<div style="font-size:12px;background:#fce8e8;color:#902020;border-radius:6px;padding:8px 10px;line-height:1.6">
+        ⚠ 曝光時間 ${p.exposure}µs 超過停留時間 ${f(dwellUs,1)}µs，物料會離開視野才曝完。<br>
+        建議曝光時間 ≤ <strong>${f(dwellUs*0.5,0)}µs</strong>（停留時間的一半，確保完整在視野內）。
+      </div>`;
+    } else if(blurPx!==null && blurPx>=1.5){
+      blurNote.innerHTML=`<div style="font-size:12px;background:#fef3de;color:#704800;border-radius:6px;padding:8px 10px;line-height:1.6">
+        ⚠ 動態模糊 ${f(blurPx,2)} px，可能影響 AOI 判讀。<br>
+        建議曝光時間 ≤ <strong>${f(0.5*p.pixsize/1000/linSpd*1e6,0)}µs</strong>（模糊 &lt; 0.5 px）。
+      </div>`;
+    } else if(blurPx!==null && blurPx<0.5){
+      blurNote.innerHTML=`<div style="font-size:12px;background:#e4f2ea;color:#1a5830;border-radius:6px;padding:8px 10px">
+        ✓ 動態模糊 ${f(blurPx,2)} px，低於 0.5 px，不影響影像品質。
+      </div>`;
+    } else {
+      blurNote.innerHTML=`<div style="font-size:12px;background:#fef3de;color:#704800;border-radius:6px;padding:8px 10px">
+        動態模糊 ${f(blurPx,2)} px，在可接受範圍（建議 &lt; 0.5 px）。
+      </div>`;
+    }
+  } else {
+    blurNote.innerHTML='';
+  }
+
+  // Hero + metrics
+  if(actMmps){
+    document.getElementById('mmps-val').textContent  = f(actMmps,2);
+    document.getElementById('mmps-desc').textContent = `實際線速度（${p.pulses} pulse/s）`;
+    document.getElementById('main-metrics').innerHTML =
+      mc('實際線速度',f(actMmps,2),'mm / s','b')+
+      mc('實際 RPM',f(actRpm,4),'RPM','g')+
+      mc('計算間距',f(pitch,3),'mm','a')+
+      `<div class="mc ${gapOk?'g':'r'}">
+        <div class="mc-l">物料空隙</div>
+        <div class="mc-v">${f(gap,3)}</div>
+        <div class="mc-u">mm${gapOk?' ✓ 安全':' ✗ 過密'}</div>
+      </div>`;
+    document.getElementById('actual-block').innerHTML =
+      `<div style="font-size:12px;color:#888;background:#f8f8f5;border-radius:6px;padding:8px 10px;line-height:1.7">
+        震動盤 ${p.target} pcs/min，轉速 ${p.pulses} pulse/s → 間距 ${f(pitch,3)} mm，空隙 ${f(gap,3)} mm
+        ${!gapOk?`<br><span style="color:#902020;font-weight:600">⚠ 空隙不足（安全下限 ${p.minGap} mm），物料可能碰撞</span>`:''}
+      </div>`;
+    document.getElementById('viz-rpm-lbl').textContent = `實際 RPM: ${f(actRpm,4)}`;
+  } else {
+    document.getElementById('mmps-val').textContent  = f(refMmps,2);
+    document.getElementById('mmps-desc').textContent = `最小安全間距（${p.minGap}mm）對應的線速度`;
+    document.getElementById('main-metrics').innerHTML =
+      mc('最小間距線速度',f(refMmps,2),'mm / s','b')+
+      mc('需要 RPM',f(refRpm,4),'RPM','g')+
+      mc('需要 pulse/s',f(refPulseS,1),'pulse / s','a')+
+      mc('最小 Pitch',f(refPitch,3),'mm','');
+    document.getElementById('actual-block').innerHTML =
+      `<div style="font-size:11px;color:#aaa;padding:4px 0">填入實際 pulse/s 可自動計算間距</div>`;
+    document.getElementById('viz-rpm-lbl').textContent = `需要 RPM: ${f(refRpm,4)}`;
+  }
+  document.getElementById('viz-mat-lbl').textContent = `~${Math.round(matsOnDisk(r,dispPitch))} 件`;
+
+  // Speed sensitivity table
+  const baseSpeed = p.pulses>0 ? p.pulses : refPulseS;
+  const speeds = p.pulses>0
+    ? [baseSpeed*0.25, baseSpeed*0.5, baseSpeed*0.75, baseSpeed, baseSpeed*1.25, baseSpeed*1.5, baseSpeed*2]
+    : [5000,10000,16000,20000,24000,32000,40000,48000];
+  let sb='';
+  speeds.filter(s=>s>0).forEach(s=>{
+    const mps = (s/p.ppc*60)/60*(2*Math.PI*r);
+    const rp  = s/p.ppc*60;
+    const pt  = mps/tps;
+    const g   = pt-p.psize;
+    const ok  = g>=p.minGap;
+    const cur = p.pulses>0 && Math.abs(s-p.pulses)<1;
+    sb+=`<tr${cur?' class="hl"':''}>`+
+      `<td${cur?' style="color:#1a4fa0;font-weight:700"':''}>${Math.round(s)}</td>`+
+      `<td>${f(mps,1)}</td><td>${f(rp,4)}</td>`+
+      `<td>${f(pt,3)}</td>`+
+      `<td style="color:${ok?'#1a6038':'#902020'};font-weight:600">${f(g,3)}</td>`+
+      `<td>${ok?'<span style="color:#1a6038;font-weight:700">✓</span>':'<span style="color:#902020;font-weight:700">✗ 過密</span>'}</td>`+
+      `</tr>`;
+  });
+  document.getElementById('size-tbody').innerHTML = sb;
+
+  // Diameter table
+  const useSpeed = p.pulses>0 ? p.pulses : refPulseS;
+  const diams=[200,300,400,500,600,700,800,1000,1200];
+  let db='';
+  diams.forEach(d=>{
+    const rd  = d/2;
+    const mps = (useSpeed/p.ppc*60)/60*(2*Math.PI*rd);
+    const rp  = useSpeed/p.ppc*60;
+    const pt  = mps/tps;
+    const g   = pt-p.psize;
+    const ok  = g>=p.minGap;
+    const isRef = d===p.diam;
+    db+=`<tr${isRef?' class="hl"':''}>`+
+      `<td class="${isRef?'diam-c':''}">Ø ${d}mm${isRef?' ←':''}</td>`+
+      `<td>${f(mps,1)}</td><td>${f(rp,4)}</td>`+
+      `<td>${f(pt,3)}</td>`+
+      `<td style="color:${ok?'#1a6038':'#902020'};font-weight:600">${f(g,3)}</td>`+
+      `<td>${ok?'<span style="color:#1a6038">✓</span>':'<span style="color:#902020">✗</span>'}</td></tr>`;
+  });
+  document.getElementById('pitch-tbody').innerHTML = db;
+}
+
+/* ─── canvas animation ─── */
+function drawCanvas(){
+  const canvas = document.getElementById('viz');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const p = getP();
+  const r_real = p.diam/2;
+  const diskR  = p.diskViz;
+  const matVR  = p.matViz;
+
+  // Derive pitch from vibratory bowl: speed ÷ target_pcs_per_second
+  const actRpm_c  = p.pulses > 0 ? p.pulses/p.ppc*60 : null;
+  const actMmps_c = actRpm_c ? actRpm_c/60*(2*Math.PI*r_real) : null;
+  const tps_c     = p.target/60;
+  const pitch     = actMmps_c ? actMmps_c/tps_c : (p.psize+(p.minGap||2));
+
+  ctx.clearRect(0,0,W,H);
+
+  // Disk center: shifted right to leave canvas left for rail
+  const CX = W * 0.535, CY = H * 0.42;
+  const pathR = diskR * 0.95;
+
+  // Derived speed (reuse actRpm_c / actMmps_c already computed above)
+  const actRpm   = actRpm_c;
+  const actMmps  = actMmps_c;
+  const actPcsMin= p.target; // vibratory bowl sets rate
+  const reqMmps  = pitch * tps_c;
+  const reqRpm   = reqMmps / (2*Math.PI*r_real) * 60;
+
+  /* ════════════════════════════════
+     LEFT ANGLED FEED RAIL（左方斜推）
+     Pickup at 7 o'clock (α = 210°)
+     Rail extends tangentially lower-left
+  ════════════════════════════════ */
+  const pickAlpha = Math.PI / 2;                   // 6 o'clock, bottom of disk
+  const pickX = CX + diskR * Math.cos(pickAlpha);  // = CX (directly below center)
+  const pickY = CY + diskR * Math.sin(pickAlpha);  // = CY + diskR
+
+  // Rail direction: extend toward lower-right (~30° below horizontal)
+  const rdx =  0.866, rdy = 0.5;    // outward = lower-right
+  const rpx =  0.5,   rpy = -0.866; // perpendicular (top side of rail)
+
+  const railLen = 72;
+  const railHW  = Math.max(matVR + 5, 8);
+  const railEndX = pickX + railLen * rdx;
+  const railEndY = pickY + railLen * rdy;
+
+  // Rail walls
+  ctx.strokeStyle='#c0c0bc'; ctx.lineWidth=1.2;
+  [[pickX+railHW*rpx, pickY+railHW*rpy, railEndX+railHW*rpx, railEndY+railHW*rpy],
+   [pickX-railHW*rpx, pickY-railHW*rpy, railEndX-railHW*rpx, railEndY-railHW*rpy]
+  ].forEach(([x1,y1,x2,y2])=>{ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();});
+
+  // Rail center guide (dashed)
+  ctx.setLineDash([3,3]); ctx.strokeStyle='#e4e4e0'; ctx.lineWidth=0.7;
+  ctx.beginPath(); ctx.moveTo(pickX,pickY); ctx.lineTo(railEndX,railEndY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Direction arrow on rail (pointing toward disk = inward = opposite of rdx,rdy)
+  const arrT = 0.55;
+  const arrX = pickX + railLen*arrT*rdx, arrY = pickY + railLen*arrT*rdy;
+  ctx.save(); ctx.translate(arrX,arrY); ctx.rotate(Math.atan2(-rdy,-rdx));
+  ctx.fillStyle='#c0c0bc';
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-6,-3.5); ctx.lineTo(-6,3.5); ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  // Animated materials on rail: same pitch as disk, speed driven by target pcs/min (震動盤)
+  // pitchPx = visual pixels per piece slot on rail, matching disk arc spacing
+  const diskPitchPx = (pitch / r_real) * pathR;           // arc px per pitch on disk
+  const vizPitchPx  = Math.max(matVR*2 + 3, diskPitchPx); // at least wide enough to not overlap
+  // railTime advances at pcs/s rate; one cycle = one pitch
+  const railOffset = (railTime % 1) * vizPitchPx;
+  for(let i=0; i<8; i++){
+    const t  = railOffset + i*vizPitchPx;
+    if(t > railLen - matVR) break;
+    const mx = railEndX - t*rdx, my = railEndY - t*rdy;
+    ctx.beginPath(); ctx.arc(mx,my,matVR,0,2*Math.PI);
+    ctx.fillStyle='#6aabf0'; ctx.fill();
+  }
+
+  // Rail label
+  ctx.fillStyle='#b8b8b4'; ctx.font='10px sans-serif'; ctx.textAlign='left';
+  ctx.fillText('直軌', railEndX + 4, railEndY + 4);
+
+  /* ════════════════════════════════
+     TURNTABLE
+  ════════════════════════════════ */
+  ctx.beginPath(); ctx.arc(CX,CY,diskR+1,0,2*Math.PI);
+  ctx.fillStyle='#e4e4e0'; ctx.fill();
+  ctx.beginPath(); ctx.arc(CX,CY,diskR,0,2*Math.PI);
+  ctx.fillStyle='#fafaf8'; ctx.fill();
+  ctx.strokeStyle='#c8c8c4'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Rotating surface markings (rotate with vizAngle so disk looks like it spins)
+  ctx.save();
+  ctx.translate(CX,CY);
+  ctx.rotate(vizAngle);
+  // Spokes
+  const spokeN = 8;
+  for(let s=0;s<spokeN;s++){
+    const sa = s*2*Math.PI/spokeN;
+    ctx.strokeStyle='rgba(200,200,196,0.55)'; ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(8*Math.cos(sa),8*Math.sin(sa));
+    ctx.lineTo((diskR-3)*Math.cos(sa),(diskR-3)*Math.sin(sa)); ctx.stroke();
+  }
+  // One bold reference spoke so you can track the rotation clearly
+  ctx.strokeStyle='rgba(160,160,156,0.7)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(diskR-3,0); ctx.stroke();
+  // Tick marks around rim
+  for(let t=0;t<24;t++){
+    const ta=t*Math.PI/12;
+    const r1=diskR-4, r2=t%3===0?diskR-8:diskR-5;
+    ctx.strokeStyle='rgba(180,180,176,0.5)'; ctx.lineWidth=t%3===0?1.2:0.7;
+    ctx.beginPath();
+    ctx.moveTo(r1*Math.cos(ta),r1*Math.sin(ta));
+    ctx.lineTo(r2*Math.cos(ta),r2*Math.sin(ta)); ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.arc(CX,CY,pathR,0,2*Math.PI);
+  ctx.strokeStyle='rgba(58,127,212,0.35)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* ════════════════════════════════
+     MATERIALS — particle system
+     pieces[] holds disk-frame angles; world angle = alpha + vizAngle
+  ════════════════════════════════ */
+  const pitchAngle = pitch / r_real;
+
+  function nearWorld(wa, ca){
+    let d=((wa-ca)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+    if(d>Math.PI)d=2*Math.PI-d;
+    return d < Math.max(pitchAngle*2, 0.06);
+  }
+
+  for(let i=0;i<pieces.length;i++){
+    const wa = pieces[i] + vizAngle;   // world angle
+    const mx = CX + pathR*Math.cos(wa);
+    const my = CY + pathR*Math.sin(wa);
+    const atCam  = nearWorld(wa,0)||nearWorld(wa,-Math.PI/2);
+    const atExit = Math.abs(wa-EJECT_ALPHA)<pitchAngle*2;
+    ctx.beginPath(); ctx.arc(mx,my,matVR,0,2*Math.PI);
+    ctx.fillStyle = atExit?'#f0a030': atCam?'#e86020':'#3a7fd4';
+    ctx.fill();
+  }
+
+  // Piece count badge
+  ctx.fillStyle='rgba(58,127,212,0.10)';
+  ctx.fillRect(CX-diskR*0.55,CY-9,diskR*1.1,18);
+  ctx.fillStyle='#5580c0'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(pieces.length+' 件', CX, CY+4);
+
+  /* ── CCW rotation arrow ── */
+  const arR=diskR*0.68;
+  ctx.strokeStyle='#d0d0cc'; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.arc(CX,CY,arR,-1.8,-0.5,false); ctx.stroke();
+  const ae=-0.5, aax=CX+arR*Math.cos(ae), aay=CY+arR*Math.sin(ae);
+  ctx.save(); ctx.translate(aax,aay); ctx.rotate(ae-Math.PI/2);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-3.5,6); ctx.lineTo(3.5,6); ctx.closePath();
+  ctx.fillStyle='#d0d0cc'; ctx.fill(); ctx.restore();
+
+  /* ── Center ── */
+  ctx.beginPath(); ctx.arc(CX,CY,4,0,2*Math.PI); ctx.fillStyle='#999'; ctx.fill();
+  ctx.beginPath(); ctx.arc(CX,CY,1.5,0,2*Math.PI); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.fillStyle='#c8c8c4'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('Ø '+p.diam+'mm', CX, CY+diskR-8);
+
+  /* ── Cameras ── */
+  drawCamera(ctx,CX,CY,diskR,0,'相機 1');
+  drawCamera(ctx,CX,CY,diskR,-Math.PI/2,'相機 2');
+
+  /* ════════════════════════════════
+     BLOW NOZZLE — 9 o'clock (left)
+  ════════════════════════════════ */
+  const blowDist = diskR+16;
+  const bx = CX - blowDist;   // 9 o'clock = directly left
+  const by = CY;
+  ctx.save(); ctx.translate(bx,by);
+  ctx.fillStyle='#555'; ctx.fillRect(-20,-5,16,10);   // body
+  ctx.fillStyle='#777'; ctx.fillRect(-4,-3.5,7,7);    // tip
+  ctx.restore();
+  // Puff jets
+  const puffPhase=(railTime%1);
+  for(let j=0;j<3;j++){
+    const t=((puffPhase+j*0.33)%1);
+    const jx=bx+5+t*16, jy=by+(j-1)*4;
+    ctx.beginPath(); ctx.arc(jx,jy,2.5-t*1.5,0,2*Math.PI);
+    ctx.fillStyle=`rgba(140,190,235,${(1-t)*0.7})`; ctx.fill();
+  }
+  ctx.fillStyle='#b0b0ac'; ctx.font='9px sans-serif'; ctx.textAlign='right';
+  ctx.fillText('吹嘴排料', bx-23, by-7);
+
+  /* ════════════════════════════════
+     LIVE READOUT — 產能 × 間距
+  ════════════════════════════════ */
+  const infoY = CY + diskR + 16;
+  const infoH = H - infoY - 4;
+  if(infoH > 20){
+    const gap_c   = pitch - p.psize;
+    const gapOk_c = gap_c >= (p.minGap||0);
+    // Actual pcs/min = min(vibratory bowl rate, disk capacity with minGap)
+    const diskCap  = actMmps ? actMmps/(p.psize+(p.minGap||0))*60 : null;
+    const pcsMin_c = diskCap!==null ? Math.min(p.target, diskCap) : null;
+
+    ctx.fillStyle = gapOk_c ? 'rgba(228,242,234,0.92)' : 'rgba(252,232,232,0.92)';
+    ctx.beginPath(); ctx.roundRect(6,infoY,W-12,Math.max(infoH,56),6); ctx.fill();
+
+    ctx.textAlign='left';
+    ctx.fillStyle='#5580c0'; ctx.font='9px sans-serif';
+    ctx.fillText('產能 (pcs/min)', 14, infoY+13);
+    ctx.fillStyle='#1a4fa0'; ctx.font='bold 20px sans-serif';
+    ctx.fillText(pcsMin_c!==null?f(pcsMin_c,0):'—', 14, infoY+34);
+    if(pcsMin_c===null){ ctx.fillStyle='#aaa'; ctx.font='9px sans-serif'; ctx.fillText('填 pulse/s',14,infoY+46); }
+
+    const midX=W/2;
+    ctx.textAlign='center';
+    ctx.fillStyle='#888'; ctx.font='9px sans-serif'; ctx.fillText('物料空隙',midX,infoY+13);
+    ctx.fillStyle=gapOk_c?'#1a6038':'#902020'; ctx.font='bold 15px sans-serif';
+    ctx.fillText(f(gap_c,3)+' mm',midX,infoY+30);
+    ctx.fillStyle='#aaa'; ctx.font='9px sans-serif';
+    ctx.fillText('Pitch '+f(pitch,3)+'mm',midX,infoY+43);
+
+    ctx.textAlign='right';
+    if(actMmps){
+      ctx.fillStyle='#888'; ctx.font='9px sans-serif'; ctx.fillText('線速度',W-14,infoY+13);
+      ctx.fillStyle='#333'; ctx.font='bold 12px sans-serif'; ctx.fillText(f(actMmps,1)+' mm/s',W-14,infoY+28);
+      ctx.fillStyle=gapOk_c?'#1a6038':'#902020'; ctx.font='bold 11px sans-serif';
+      ctx.fillText(gapOk_c?'✓ 安全':'✗ 過密',W-14,infoY+43);
+    } else {
+      ctx.fillStyle='#aaa'; ctx.font='9px sans-serif';
+      ctx.fillText('填 pulse/s',W-14,infoY+13); ctx.fillText('看實際值',W-14,infoY+25);
+    }
+  }
+}
+
+function drawCamera(ctx, CX, CY, diskR, angle, label){
+  const dist = diskR + 17;
+  const camX = CX + dist*Math.cos(angle);
+  const camY = CY + dist*Math.sin(angle);
+
+  // unit vector from camera → disk center
+  const dx=CX-camX, dy=CY-camY, len=Math.sqrt(dx*dx+dy*dy);
+  const ux=dx/len, uy=dy/len, px=-uy, py=ux;
+
+  // FOV cone (reaches disk edge)
+  const spread=0.3, fLen=dist-2;
+  ctx.beginPath();
+  ctx.moveTo(camX, camY);
+  ctx.lineTo(camX+fLen*(ux+px*spread), camY+fLen*(uy+py*spread));
+  ctx.lineTo(camX+fLen*(ux-px*spread), camY+fLen*(uy-py*spread));
+  ctx.closePath();
+  ctx.fillStyle='rgba(58,127,212,0.07)'; ctx.fill();
+  ctx.strokeStyle='rgba(58,127,212,0.2)'; ctx.lineWidth=0.8; ctx.stroke();
+
+  // Camera body (rotated toward disk)
+  ctx.save();
+  ctx.translate(camX, camY);
+  ctx.rotate(Math.atan2(uy,ux));
+  ctx.fillStyle='#505050'; ctx.fillRect(-6,-7,14,14);   // body
+  ctx.fillStyle='#707070'; ctx.fillRect(8,-4,6,8);      // lens barrel
+  ctx.beginPath(); ctx.arc(11,0,2.8,0,2*Math.PI);
+  ctx.fillStyle='#3a7fd4'; ctx.fill();                   // lens glass
+  ctx.restore();
+
+  // Label
+  const lDist = dist+26;
+  ctx.fillStyle='#888'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(label, CX+lDist*Math.cos(angle), CY+lDist*Math.sin(angle)+4);
+}
+
+/* ─── animation loop ─── */
+function animate(ts){
+  if(!lastTs) lastTs=ts;
+  const dt=Math.min((ts-lastTs)/1000,0.05);
+  lastTs=ts;
+  const p=getP();
+  const r=p.diam/2;
+  const tps=Math.max(0.01, p.target/60);
+
+  // Reset pieces when key params change
+  const nk=`${p.pulses}-${p.target}-${p.diam}-${p.ppc}-${p.psize}-${p.minGap}`;
+  if(nk!==paramKey){ pieces=[]; lastFeedVizAngle=null; paramKey=nk; vizAngle=0; railTime=0; }
+
+  // Actual disk RPM
+  let actualRpm = p.pulses>0 ? p.pulses/p.ppc*60 : 0;
+  if(actualRpm===0){
+    const rp=(p.psize+(p.minGap||2))*tps/(2*Math.PI*r)*60;
+    actualRpm=Math.max(0.01, rp);
+  }
+  const vizRpm=Math.max(0.2, Math.min(actualRpm*DISPLAY_SCALE, 80));
+  vizAngle -= vizRpm*2*Math.PI/60*dt;   // CCW
+
+  // Feed pieces: one piece per pitchAngle of display rotation
+  const pitchAngle_feed = tps>0 ? vizRpm*2*Math.PI/60/tps : 99;
+  if(pitchAngle_feed<Math.PI*2){
+    if(lastFeedVizAngle===null){
+      pieces.push(PICK_ALPHA-vizAngle);
+      lastFeedVizAngle=vizAngle;
+    } else if((lastFeedVizAngle-vizAngle)>=pitchAngle_feed){
+      pieces.push(PICK_ALPHA-vizAngle);
+      lastFeedVizAngle=vizAngle;
+    }
+  }
+
+  // Eject pieces that have passed 9 o'clock
+  pieces=pieces.filter(a=>(a+vizAngle)>EJECT_ALPHA);
+
+  // Rail: advance at feed rate (visual)
+  railTime+=dt*Math.min(tps*DISPLAY_SCALE*0.5, 12);
+
+  drawCanvas();
+  requestAnimationFrame(animate);
+}
+
+
+/* ─── wire events ─── */
+['target','psize','ppc','diam','pulses','min-gap','exposure','pixsize','sensor-px','magnification','focal','wd'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', update);
+});
+document.getElementById('lens-type').addEventListener('change', update);
+['viz-disk','viz-mat'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', drawCanvas);
+});
+
+update();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
