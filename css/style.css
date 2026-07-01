@@ -1,0 +1,318 @@
+    :root {
+      --main-bg:#f3f4f6;
+      --main-card:#fff;
+      --main-border:#d1d5db;
+      --main-blue:#2563eb;
+      --main-dark:#111827;
+    }
+
+    body {
+      margin:0;
+      font-family:"Microsoft JhengHei","Noto Sans TC",Arial,sans-serif;
+      background:var(--main-bg);
+      color:#1f2937;
+    }
+
+    .main-header {
+      background:var(--main-dark);
+      color:white;
+      padding:22px 28px;
+    }
+
+    .main-header h1 {
+      margin:0;
+      font-size:24px;
+    }
+
+    .main-header p {
+      margin:8px 0 0;
+      color:#d1d5db;
+      font-size:14px;
+    }
+
+    .main-wrap {
+      max-width:1480px;
+      margin:0 auto;
+      padding:22px;
+    }
+
+    .main-tabs {
+      display:flex;
+      gap:8px;
+      background:#e5e7eb;
+      padding:6px;
+      border-radius:14px;
+      margin-bottom:18px;
+      overflow-x:auto;
+    }
+
+    .main-tab {
+      flex:1 0 180px;
+      border:0;
+      border-radius:10px;
+      padding:12px 14px;
+      font-weight:800;
+      font-size:15px;
+      color:#4b5563;
+      background:transparent;
+      cursor:pointer;
+    }
+
+    .main-tab.active {
+      background:white;
+      color:var(--main-blue);
+      box-shadow:0 2px 10px rgba(15,23,42,.12);
+    }
+
+    .main-panel {
+      display:none;
+    }
+
+    .main-panel.active {
+      display:block;
+    }
+
+    .main-card {
+      background:var(--main-card);
+      border:1px solid var(--main-border);
+      border-radius:14px;
+      box-shadow:0 8px 20px rgba(15,23,42,.06);
+      overflow:hidden;
+      margin-bottom:18px;
+    }
+
+    .main-card h2 {
+      margin:0;
+      padding:14px 16px;
+      background:#e5e7eb;
+      font-size:17px;
+    }
+
+    .main-section {
+      padding:16px;
+      border-top:1px solid #eef2f7;
+    }
+
+    .main-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(230px,1fr));
+      gap:12px;
+    }
+
+    .main-label {
+      display:grid;
+      gap:6px;
+      font-size:13px;
+      color:#374151;
+      font-weight:700;
+    }
+
+    .main-input-row {
+      display:grid;
+      grid-template-columns:1fr 88px;
+      gap:8px;
+      align-items:center;
+    }
+
+    .main-input, .main-select {
+      width:100%;
+      height:38px;
+      border:1px solid #d1d5db;
+      border-radius:8px;
+      padding:0 10px;
+      font-size:14px;
+      background:white;
+    }
+
+    .main-unit {
+      height:38px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #e5e7eb;
+      border-radius:8px;
+      background:#f9fafb;
+      color:#6b7280;
+      font-size:13px;
+    }
+
+    .main-results {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(180px,1fr));
+      gap:12px;
+    }
+
+    .main-result {
+      border:1px solid #dbeafe;
+      border-radius:12px;
+      padding:12px;
+      background:#fbfdff;
+    }
+
+    .main-result-l {
+      font-size:13px;
+      color:#6b7280;
+      margin-bottom:6px;
+      font-weight:700;
+    }
+
+    .main-result-v {
+      font-size:21px;
+      font-weight:900;
+      color:#1e40af;
+      line-height:1.25;
+    }
+
+    .main-result-u {
+      font-size:13px;
+      color:#6b7280;
+      margin-left:4px;
+      font-weight:500;
+    }
+
+    .main-status {
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+      margin-top:8px;
+    }
+
+    .main-ok { background:#dcfce7; color:#166534; }
+    .main-ng { background:#fee2e2; color:#991b1b; }
+
+    .main-box {
+      border-radius:12px;
+      padding:14px;
+      border-left:5px solid #2563eb;
+      background:#eff6ff;
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    .main-box.green { border-left-color:#16a34a; background:#f0fdf4; }
+    .main-box.orange { border-left-color:#f97316; background:#fff7ed; }
+    .main-box.red { border-left-color:#dc2626; background:#fef2f2; }
+
+    .main-progress-bg {
+      width:100%;
+      height:10px;
+      background:#e5e7eb;
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    .main-progress-bar {
+      height:100%;
+      border-radius:999px;
+      transition:width .25s;
+    }
+
+    .main-table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+
+    .main-table th,
+    .main-table td {
+      border:1px solid #e5e7eb;
+      padding:8px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    .main-table th {
+      background:#f3f4f6;
+      width:38%;
+    }
+
+    .main-formula {
+      margin:0;
+      padding:16px;
+      background:#0f172a;
+      color:#e5e7eb;
+      font-family:Consolas,"Courier New",monospace;
+      font-size:13px;
+      line-height:1.7;
+      overflow-x:auto;
+      white-space:pre-wrap;
+      border-radius:12px;
+    }
+
+    .main-toolbar {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      margin-bottom:16px;
+    }
+
+    .main-btn {
+      height:38px;
+      border:1px solid #d1d5db;
+      background:white;
+      border-radius:8px;
+      padding:0 12px;
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    .main-btn.primary {
+      background:#2563eb;
+      color:white;
+      border-color:#2563eb;
+    }
+
+    @media(max-width:900px) {
+      .main-grid,.main-results { grid-template-columns:1fr; }
+    }
+
+    /* ===== 轉盤工具原始樣式，限制在 turntable panel 內較少衝突 ===== */
+    #panel-turntable *{box-sizing:border-box}
+    #panel-turntable .wrap{max-width:1060px;margin:0 auto;padding:20px 16px 60px}
+    #panel-turntable h1{font-size:17px;font-weight:700;margin-bottom:2px}
+    #panel-turntable .sub{font-size:12px;color:#888;margin-bottom:18px}
+    #panel-turntable .layout{display:flex;gap:14px;align-items:flex-start}
+    #panel-turntable .left-col{flex:1;min-width:0}
+    #panel-turntable .right-col{width:296px;flex-shrink:0}
+    #panel-turntable .sticky-card{position:sticky;top:16px}
+    #panel-turntable .card{background:#fff;border:1px solid #e0e0dc;border-radius:12px;padding:16px 18px;margin-bottom:12px;box-shadow:none;overflow:visible}
+    #panel-turntable .sl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#aaa;margin-bottom:12px}
+    #panel-turntable .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    #panel-turntable .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    #panel-turntable .fld{display:flex;flex-direction:column;gap:4px}
+    #panel-turntable .fld label{font-size:11px;color:#777;font-weight:600}
+    #panel-turntable .fld input[type=number]{border:1px solid #d8d8d4;border-radius:6px;padding:6px 9px;font-size:14px;width:100%;outline:none;color:#1a1a1a;background:#fff;height:auto}
+    #panel-turntable .fld input[type=number]:focus{border-color:#3a7fd4;box-shadow:0 0 0 2px rgba(58,127,212,.12)}
+    #panel-turntable .fld input[type=range]{accent-color:#3a7fd4;width:100%;margin-top:2px}
+    #panel-turntable .hint{font-size:10px;color:#bbb;margin-top:2px;line-height:1.4}
+    #panel-turntable .pitch-vis{display:flex;height:30px;background:#f0f0ec;border-radius:6px;overflow:hidden;border:1px solid #e8e8e4;margin-top:6px}
+    #panel-turntable .pv-piece{background:#3a7fd4;height:100%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;transition:width .15s;min-width:2px}
+    #panel-turntable .pv-gap{background:#e4e4e0;height:100%;transition:width .15s}
+    #panel-turntable .hero{display:flex;align-items:baseline;gap:8px;background:#e6f0fb;border-radius:8px;padding:12px 14px;margin-bottom:10px;flex-wrap:wrap}
+    #panel-turntable .hero-num{font-size:30px;font-weight:800;color:#1a4fa0;line-height:1}
+    #panel-turntable .hero-unit{font-size:13px;color:#4a7aba}
+    #panel-turntable .hero-desc{font-size:11px;color:#7a9acc;margin-left:2px}
+    #panel-turntable .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px}
+    #panel-turntable .mc{border-radius:7px;padding:9px 11px}
+    #panel-turntable .mc-l{font-size:10px;margin-bottom:3px}
+    #panel-turntable .mc-v{font-size:17px;font-weight:700;line-height:1.2}
+    #panel-turntable .mc-u{font-size:10px;margin-top:1px}
+    #panel-turntable .mc.b{background:#e6f0fb}#panel-turntable .mc.b .mc-l{color:#3060b0}#panel-turntable .mc.b .mc-v{color:#1a4fa0}#panel-turntable .mc.b .mc-u{color:#5080c0}
+    #panel-turntable .mc.g{background:#e4f2ea}#panel-turntable .mc.g .mc-l{color:#2a7040}#panel-turntable .mc.g .mc-v{color:#1a5830}#panel-turntable .mc.g .mc-u{color:#3a8050}
+    #panel-turntable .mc.a{background:#fef3de}#panel-turntable .mc.a .mc-l{color:#906010}#panel-turntable .mc.a .mc-v{color:#704800}#panel-turntable .mc.a .mc-u{color:#a07020}
+    #panel-turntable .mc.r{background:#fce8e8}#panel-turntable .mc.r .mc-l{color:#b03030}#panel-turntable .mc.r .mc-v{color:#902020}#panel-turntable .mc.r .mc-u{color:#c04040}
+    #panel-turntable table{width:100%;border-collapse:collapse;font-size:12px}
+    #panel-turntable th{font-size:10px;font-weight:700;color:#aaa;text-align:left;padding:6px 8px;border-bottom:2px solid #e8e8e4;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;background:transparent;width:auto}
+    #panel-turntable td{padding:6px 8px;border-bottom:1px solid #f0f0ec;color:#333;vertical-align:middle}
+    #panel-turntable tr.hl td{background:#eef5ff;font-weight:600}
+    #panel-turntable td.diam-c{color:#1a4fa0;font-weight:700}
+    #panel-turntable #viz{display:block;border-radius:8px;background:#f8f8f5;border:1px solid #e8e8e4}
+    #panel-turntable .viz-ctrl{margin-top:8px}
+    #panel-turntable .viz-ctrl label{font-size:10px;color:#999;font-weight:600;display:block;margin-bottom:2px}
+    #panel-turntable .viz-ctrl input[type=range]{accent-color:#3a7fd4;width:100%}
+    #panel-turntable .viz-info{display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:6px}
+    @media(max-width:720px){#panel-turntable .layout{flex-direction:column}#panel-turntable .right-col{width:100%}#panel-turntable .sticky-card{position:static}}
+    @media(max-width:520px){#panel-turntable .g3{grid-template-columns:1fr 1fr}}
