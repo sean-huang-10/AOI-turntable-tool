@@ -99,7 +99,7 @@ function update(){
   document.getElementById('fld-mag').style.display     = p.lensType==='telecentric'?'flex':'none';
 
   // ── Camera dwell & motion blur ──
-  const linSpd = actMmps || (reqMmps);   // mm/s at sensing radius
+  const linSpd = actMmps || refMmps;   // mm/s at sensing radius
   const dwellMs   = linSpd>0 ? (fovMm/linSpd)*1000 : null;
   const dwellUs   = dwellMs ? dwellMs*1000 : null;
   const blurMm    = linSpd>0 ? linSpd*(p.exposure/1e6) : null;
@@ -162,7 +162,8 @@ function update(){
         <div class="mc-l">物料空隙</div>
         <div class="mc-v">${f(gap,3)}</div>
         <div class="mc-u">mm${gapOk?' ✓ 安全':' ✗ 過密'}</div>
-      </div>`;
+      </div>`+
+      mc('相機所需 FPS',f(tps,2),'fps（件/秒）','');
     document.getElementById('actual-block').innerHTML =
       `<div style="font-size:12px;color:#888;background:#f8f8f5;border-radius:6px;padding:8px 10px;line-height:1.7">
         震動盤 ${p.target} pcs/min，轉速 ${p.pulses} pulse/s → 間距 ${f(pitch,3)} mm，空隙 ${f(gap,3)} mm
@@ -176,7 +177,8 @@ function update(){
       mc('最小間距線速度',f(refMmps,2),'mm / s','b')+
       mc('需要 RPM',f(refRpm,4),'RPM','g')+
       mc('需要 pulse/s',f(refPulseS,1),'pulse / s','a')+
-      mc('最小 Pitch',f(refPitch,3),'mm','');
+      mc('最小 Pitch',f(refPitch,3),'mm','')+
+      mc('相機所需 FPS',f(tps,2),'fps（件/秒）','');
     document.getElementById('actual-block').innerHTML =
       `<div style="font-size:11px;color:#aaa;padding:4px 0">填入實際 pulse/s 可自動計算間距</div>`;
     document.getElementById('viz-rpm-lbl').textContent = `需要 RPM: ${f(refRpm,4)}`;
