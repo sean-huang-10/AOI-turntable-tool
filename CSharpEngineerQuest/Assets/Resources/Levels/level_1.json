@@ -1,0 +1,18 @@
+{
+  "levelId": 1,
+  "worldId": 1,
+  "title": "設備啟動",
+  "topic": "bool",
+  "difficulty": 1,
+  "questionType": "FillCode",
+  "story": "你剛接手一台無法啟動的 AOI 設備。工程師留下的程式缺少設備 Ready 狀態。請建立 machineReady 變數。",
+  "question": "建立 bool machineReady 並設定為 true。",
+  "starterCode": "",
+  "expectedAnswer": "bool machineReady = true;",
+  "hints": [
+    "這個狀態只有 true / false。",
+    "可以使用 bool。",
+    "bool machineReady = ___;"
+  ],
+  "xpReward": 100
+}

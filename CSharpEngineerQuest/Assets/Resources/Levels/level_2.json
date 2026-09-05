@@ -1,0 +1,18 @@
+{
+  "levelId": 2,
+  "worldId": 1,
+  "title": "啟動馬達",
+  "topic": "if",
+  "difficulty": 1,
+  "questionType": "FillCode",
+  "story": "設備已成功啟動。現在必須確認設備 Ready 後才可以啟動馬達。",
+  "question": "請完成判斷式，確認 machineReady 為 true 時才呼叫 StartMotor()。",
+  "starterCode": "bool machineReady = true;\n___________\n{\n    StartMotor();\n}",
+  "expectedAnswer": "if (machineReady)",
+  "hints": [
+    "只有在條件成立時，裡面的程式才會執行。",
+    "可以使用 if 陳述式。",
+    "if (___)"
+  ],
+  "xpReward": 120
+}
