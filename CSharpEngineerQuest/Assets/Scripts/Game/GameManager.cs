@@ -3,15 +3,16 @@ using CSharpEngineerQuest.Data;
 using CSharpEngineerQuest.Judge;
 using CSharpEngineerQuest.Learning;
 using CSharpEngineerQuest.Level;
+using CSharpEngineerQuest.Save;
 using UnityEngine;
 
 namespace CSharpEngineerQuest.Game
 {
     /// <summary>
     /// Owns game flow and current state (current level, last judge result),
-    /// and delegates the actual work to LevelManager/QuestionManager/JudgeManager.
-    /// Does not touch UI, parse JSON, judge answers itself, or read/write save
-    /// files - those stay in their own managers.
+    /// and delegates the actual work to LevelManager/QuestionManager/JudgeManager/
+    /// SaveManager. Does not touch UI, parse JSON, or judge answers itself -
+    /// those stay in their own managers.
     ///
     /// This is the one persistent singleton in the project (it has to survive
     /// scene loads to carry state between them); the managers it owns are
@@ -28,6 +29,7 @@ namespace CSharpEngineerQuest.Game
         private LevelManager _levelManager;
         private QuestionManager _questionManager;
         private JudgeManager _judgeManager;
+        private SaveManager _saveManager;
 
         private void Awake()
         {
@@ -43,7 +45,8 @@ namespace CSharpEngineerQuest.Game
             _levelManager = new LevelManager(new LevelLoader());
             _questionManager = new QuestionManager();
             _judgeManager = new JudgeManager(new RuleBasedJudge());
-            PlayerProgress = new PlayerProgress();
+            _saveManager = new SaveManager();
+            PlayerProgress = _saveManager.Load();
         }
 
         public LevelData GetLevel(int levelId)
@@ -92,6 +95,7 @@ namespace CSharpEngineerQuest.Game
                 }
 
                 _levelManager.UnlockNextLevel(PlayerProgress, CurrentLevel.levelId);
+                _saveManager.Save(PlayerProgress);
             }
 
             SceneController.LoadResultScene();
