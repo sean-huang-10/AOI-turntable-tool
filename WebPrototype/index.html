@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>C# Engineer Quest</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="phone">
+
+    <!-- Home Scene -->
+    <section id="screen-home" class="screen active">
+      <div class="home-content">
+        <h1 class="game-title">C# Engineer Quest</h1>
+        <div class="stat-row">
+          <div class="stat">
+            <span class="stat-label">Player Level</span>
+            <span class="stat-value" id="home-level">1</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">XP</span>
+            <span class="stat-value" id="home-xp">0</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="btn-start">START</button>
+      </div>
+    </section>
+
+    <!-- World Map Scene -->
+    <section id="screen-worldmap" class="screen">
+      <header class="topbar">
+        <button class="btn-icon" id="btn-worldmap-back">←</button>
+        <h2>WORLD 1・設備啟動</h2>
+      </header>
+      <div class="level-list" id="level-list"></div>
+    </section>
+
+    <!-- Level Scene -->
+    <section id="screen-level" class="screen">
+      <header class="topbar">
+        <button class="btn-icon" id="btn-level-back">←</button>
+        <div>
+          <h2 id="level-title">Level</h2>
+          <p class="level-topic" id="level-topic"></p>
+        </div>
+      </header>
+      <div class="level-body">
+        <div class="panel">
+          <p class="panel-label">Story</p>
+          <p id="level-story"></p>
+        </div>
+        <div class="panel">
+          <p class="panel-label">Mission</p>
+          <p id="level-question"></p>
+        </div>
+        <div class="panel">
+          <p class="panel-label">Code Input</p>
+          <textarea id="level-code-input" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+        </div>
+        <p class="hint-text" id="level-hint"></p>
+      </div>
+      <footer class="action-row">
+        <button class="btn btn-secondary" id="btn-hint">Hint</button>
+        <button class="btn btn-primary" id="btn-submit">Submit</button>
+      </footer>
+    </section>
+
+    <!-- Result Scene -->
+    <section id="screen-result" class="screen">
+      <div class="result-content">
+        <div id="result-success" class="result-panel">
+          <p class="result-title success">LEVEL COMPLETE</p>
+          <p class="result-stars">★★★</p>
+          <p class="result-xp" id="result-xp"></p>
+          <button class="btn btn-primary" id="btn-next-level">NEXT LEVEL</button>
+        </div>
+        <div id="result-failure" class="result-panel">
+          <p class="result-title failure">CODE ERROR</p>
+          <p class="result-message">再檢查一下你的程式。</p>
+          <button class="btn btn-primary" id="btn-try-again">TRY AGAIN</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/judge.js"></script>
+  <script src="js/save.js"></script>
+  <script src="js/levelManager.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
